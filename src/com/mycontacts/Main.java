@@ -11,7 +11,14 @@
 package com.mycontacts;
 
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.mycontacts.contact.model.EmailAddress;
+import com.mycontacts.contact.model.PhoneNumber;
+import com.mycontacts.contact.model.Contact;
+import com.mycontacts.contact.repository.InMemoryContactRepository;
+import com.mycontacts.contact.service.ContactService;
 import com.mycontacts.user.auth.Authentication;
 import com.mycontacts.user.auth.BasicAuthStrategy;
 import com.mycontacts.user.auth.OAuthStrategy;
@@ -27,6 +34,7 @@ public class Main {
         UserRegistrationService registrationService = new UserRegistrationService();
         UserRepository userRepository = new UserRepository();
         UserProfileService profileService = new UserProfileService(userRepository);
+        ContactService contactService = new ContactService(new InMemoryContactRepository());
 
         try (Scanner scanner = new Scanner(System.in)) {
             String choice;
@@ -105,6 +113,7 @@ public class Main {
                             System.out.println("2) Change password");
                             System.out.println("3) Update notifications preference");
                             System.out.println("4) View profile");
+                            System.out.println("5) Create contact (UC4)");
                             System.out.println("0) Exit");
                             System.out.print("Choose an option: ");
                             profileChoice = scanner.nextLine();
@@ -134,6 +143,42 @@ public class Main {
                                     System.out.println("Email ID: " + user.getEmail());
                                     System.out.println("Subscription Type: " + user.getAccountType());
                                     System.out.println("Notifications Enabled: " + user.isNotificationsEnabled());
+                                } else if ("5".equals(profileChoice)) {
+                                    System.out.println("\n=== UC4: Create Contact ===");
+                                    System.out.print("Contact type (person/organization): ");
+                                    String contactType = scanner.nextLine();
+
+                                    System.out.print("Contact name: ");
+                                    String contactName = scanner.nextLine();
+
+                                    List<PhoneNumber> phones = new ArrayList<>();
+                                    while (true) {
+                                        System.out.print("Add phone number (or press Enter to stop): ");
+                                        String phone = scanner.nextLine();
+                                        if (phone == null || phone.trim().isEmpty()) {
+                                            break;
+                                        }
+                                        phones.add(new PhoneNumber(phone.trim()));
+                                    }
+
+                                    List<EmailAddress> emails = new ArrayList<>();
+                                    while (true) {
+                                        System.out.print("Add email address (or press Enter to stop): ");
+                                        String contactEmail = scanner.nextLine();
+                                        if (contactEmail == null || contactEmail.trim().isEmpty()) {
+                                            break;
+                                        }
+                                        emails.add(new EmailAddress(contactEmail.trim()));
+                                    }
+
+                                    System.out.print("Notes (optional, press Enter to skip): ");
+                                    String notes = scanner.nextLine();
+
+                                    Contact created = contactService.createContact(loginEmail, contactType, contactName, phones, emails, notes);
+                                    System.out.println("\nContact created successfully.");
+                                    System.out.println("Contact ID: " + created.getId());
+                                    System.out.println("Contact Type: " + created.getContactType());
+                                    System.out.println("Contact Name: " + created.getName());
                                 }
                             } catch (ValidationException profileException) {
                                 System.out.println("\nProfile update failed: " + profileException.getMessage());
