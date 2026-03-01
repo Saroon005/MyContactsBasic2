@@ -1,12 +1,12 @@
 /**
- * Use Case 6 - Edit Contact
+ * Use Case 7 - Delete Contact
  *
- * Extending UC5 to implement editing contacts.
+ * Extending UC6 to implement deleting contacts.
  *
  * Console entry point. Registers a user, logs them in using a chosen authentication
  * strategy, then allows profile updates and contact operations.
  * @author developer
- * @version 6.0
+ * @version 7.0
  * 
  */
 package com.mycontacts;
@@ -117,6 +117,7 @@ public class Main {
                             System.out.println("5) Create contact (UC4)");
                             System.out.println("6) View contact details (UC5)");
                             System.out.println("7) Edit contact (UC6)");
+                            System.out.println("8) Delete contact (UC7)");
                             System.out.println("0) Exit");
                             System.out.print("Choose an option: ");
                             profileChoice = scanner.nextLine();
@@ -284,6 +285,28 @@ public class Main {
                                             }
                                         }
                                     } while (!"0".equals(editChoice));
+                                } else if ("8".equals(profileChoice)) {
+                                    System.out.println("\n=== UC7: Delete Contact ===");
+                                    System.out.print("Enter Contact Name: ");
+                                    String contactName = scanner.nextLine();
+
+                                    List<Contact> matches = contactService.findContactsByName(loginEmail, contactName);
+                                    if (matches.isEmpty()) {
+                                        System.out.println("No contact found with that name.");
+                                        continue;
+                                    }
+
+                                    System.out.println("Found " + matches.size() + " contact(s) with that name.");
+                                    System.out.print("Are you sure you want to delete? (yes/no): ");
+                                    String confirm = scanner.nextLine();
+                                    boolean confirmed = confirm != null && confirm.trim().equalsIgnoreCase("yes");
+                                    if (!confirmed) {
+                                        System.out.println("Delete cancelled.");
+                                        continue;
+                                    }
+
+                                    int deletedCount = contactService.deleteContactsByName(loginEmail, contactName);
+                                    System.out.println("Deleted " + deletedCount + " contact(s).");
                                 }
                             } catch (ValidationException profileException) {
                                 System.out.println("\nProfile update failed: " + profileException.getMessage());

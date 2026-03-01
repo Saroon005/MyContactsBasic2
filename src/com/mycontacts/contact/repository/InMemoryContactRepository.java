@@ -59,4 +59,33 @@ public class InMemoryContactRepository implements ContactRepository {
         }
         return Optional.empty();
     }
+
+    @Override
+    public int deleteByNameForUser(String userEmail, String contactName) {
+        if (userEmail == null || userEmail.trim().isEmpty()) {
+            return 0;
+        }
+        if (contactName == null || contactName.trim().isEmpty()) {
+            return 0;
+        }
+
+        List<Contact> list = contactsByUserEmail.get(userEmail.toLowerCase());
+        if (list == null || list.isEmpty()) {
+            return 0;
+        }
+
+        String normalizedName = contactName.trim().toLowerCase();
+
+        int beforeSize;
+        int afterSize;
+        synchronized (list) {
+            beforeSize = list.size();
+            list.removeIf(c -> c != null
+                    && c.getName() != null
+                    && c.getName().trim().toLowerCase().equals(normalizedName));
+            afterSize = list.size();
+        }
+
+        return Math.max(0, beforeSize - afterSize);
+    }
 }

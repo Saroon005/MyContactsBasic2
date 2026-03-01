@@ -19,4 +19,6 @@ public interface ContactRepository {
     List<Contact> getForUser(String userEmail);
 
     Optional<Contact> findByIdForUser(String userEmail, UUID contactId);
+
+    int deleteByNameForUser(String userEmail, String contactName);
 }

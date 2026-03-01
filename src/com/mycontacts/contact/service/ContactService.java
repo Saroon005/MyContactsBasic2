@@ -90,4 +90,15 @@ public class ContactService {
 
         return matches;
     }
+
+    public int deleteContactsByName(String ownerEmail, String contactName) throws ValidationException {
+        if (ownerEmail == null || ownerEmail.trim().isEmpty()) {
+            throw new ValidationException("Owner email is required.");
+        }
+        if (contactName == null || contactName.trim().isEmpty()) {
+            throw new ValidationException("Contact name is required.");
+        }
+
+        return contactRepository.deleteByNameForUser(ownerEmail, contactName);
+    }
 }
