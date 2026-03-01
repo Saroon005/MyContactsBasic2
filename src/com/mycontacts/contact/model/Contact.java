@@ -90,6 +90,19 @@ public abstract class Contact {
         touch();
     }
 
+    public boolean removeTag(String tag) {
+        if (tag == null || tag.trim().isEmpty()) {
+            return false;
+        }
+
+        String normalized = tag.trim();
+        boolean removed = tags.removeIf(existing -> existing != null && existing.trim().equalsIgnoreCase(normalized));
+        if (removed) {
+            touch();
+        }
+        return removed;
+    }
+
     public int getTimesContacted() {
         return timesContacted;
     }

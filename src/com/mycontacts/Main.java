@@ -1,12 +1,12 @@
 /**
- * Use Case 10 - Advanced Filtering
+ * Use Case 11 - Create and Manage Tags
  *
- * Extending UC9 to implement advanced filtering by tag, date added, and frequently contacted.
+ * Extending UC10 to implement creating and managing user tags for organizing contacts.
  *
  * Console entry point. Registers a user, logs them in using a chosen authentication
  * strategy, then allows profile updates and contact operations.
  * @author developer
- * @version 10.0
+ * @version 11.0
  * 
  */
 package com.mycontacts;
@@ -21,6 +21,8 @@ import com.mycontacts.contact.model.PhoneNumber;
 import com.mycontacts.contact.model.Contact;
 import com.mycontacts.contact.repository.InMemoryContactRepository;
 import com.mycontacts.contact.service.ContactService;
+import com.mycontacts.tag.repository.InMemoryTagRepository;
+import com.mycontacts.tag.service.TagService;
 import com.mycontacts.user.auth.Authentication;
 import com.mycontacts.user.auth.BasicAuthStrategy;
 import com.mycontacts.user.auth.OAuthStrategy;
@@ -37,6 +39,7 @@ public class Main {
         UserRepository userRepository = new UserRepository();
         UserProfileService profileService = new UserProfileService(userRepository);
         ContactService contactService = new ContactService(new InMemoryContactRepository());
+        TagService tagService = new TagService(new InMemoryTagRepository());
 
         try (Scanner scanner = new Scanner(System.in)) {
             String choice;
@@ -122,6 +125,7 @@ public class Main {
                             System.out.println("9) Bulk operations (UC8)");
                             System.out.println("10) Search contacts (UC9)");
                             System.out.println("11) Advanced filtering (UC10)");
+                            System.out.println("12) Manage tags (UC11)");
                             System.out.println("0) Exit");
                             System.out.print("Choose an option: ");
                             profileChoice = scanner.nextLine();
@@ -364,6 +368,8 @@ public class Main {
                                                 continue;
                                             }
 
+                                            tagService.createTag(loginEmail, tag);
+
                                             System.out.print("Enter contact names separated by commas: ");
                                             String namesInput = scanner.nextLine();
                                             List<String> names = parseCommaSeparated(namesInput);
@@ -462,6 +468,72 @@ public class Main {
                                             System.out.println();
                                         }
                                     }
+                                } else if ("12".equals(profileChoice)) {
+                                    String tagChoice;
+                                    do {
+                                        System.out.println("\n=== UC11: Manage Tags ===");
+                                        System.out.println("1) Create tag");
+                                        System.out.println("2) List tags");
+                                        System.out.println("3) Delete tag");
+                                        System.out.println("0) Back");
+                                        System.out.print("Choose an option: ");
+                                        tagChoice = scanner.nextLine();
+
+                                        if ("1".equals(tagChoice)) {
+                                            System.out.print("Enter new tag name: ");
+                                            String newTag = scanner.nextLine();
+                                            boolean added = tagService.createTag(loginEmail, newTag);
+                                            if (added) {
+                                                System.out.println("Tag created: " + newTag.trim());
+                                            } else {
+                                                System.out.println("Tag already exists (or invalid).");
+                                            }
+                                        } else if ("2".equals(tagChoice)) {
+                                            List<String> tags = tagService.listTags(loginEmail);
+                                            if (tags.isEmpty()) {
+                                                System.out.println("No tags found.");
+                                            } else {
+                                                System.out.println("Tags:");
+                                                for (String t : tags) {
+                                                    System.out.println("- " + t);
+                                                }
+                                            }
+                                        } else if ("3".equals(tagChoice)) {
+                                            System.out.print("Enter tag name to delete: ");
+                                            String tagToDelete = scanner.nextLine();
+                                            if (tagToDelete == null || tagToDelete.trim().isEmpty()) {
+                                                System.out.println("Tag cannot be empty.");
+                                                continue;
+                                            }
+
+                                            System.out.print("Are you sure you want to delete this tag? (yes/no): ");
+                                            String confirm = scanner.nextLine();
+                                            boolean confirmed = confirm != null && confirm.trim().equalsIgnoreCase("yes");
+                                            if (!confirmed) {
+                                                System.out.println("Delete cancelled.");
+                                                continue;
+                                            }
+
+                                            boolean deleted = tagService.deleteTag(loginEmail, tagToDelete);
+
+                                            int removedFromContacts = 0;
+                                            List<Contact> contacts = contactService.getContactsForUser(loginEmail);
+                                            for (Contact contact : contacts) {
+                                                if (contact != null && contact.removeTag(tagToDelete)) {
+                                                    removedFromContacts++;
+                                                }
+                                            }
+
+                                            if (deleted) {
+                                                System.out.println("Tag deleted: " + tagToDelete.trim());
+                                            } else {
+                                                System.out.println("Tag not found.");
+                                            }
+                                            if (removedFromContacts > 0) {
+                                                System.out.println("Removed tag from " + removedFromContacts + " contact(s). ");
+                                            }
+                                        }
+                                    } while (!"0".equals(tagChoice));
                                 }
                             } catch (ValidationException profileException) {
                                 System.out.println("\nProfile update failed: " + profileException.getMessage());
