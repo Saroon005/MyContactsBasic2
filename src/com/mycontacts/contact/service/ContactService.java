@@ -109,4 +109,70 @@ public class ContactService {
 
         return contactRepository.getForUser(ownerEmail);
     }
+
+    public List<Contact> searchContacts(String ownerEmail, String searchTerm) throws ValidationException {
+        if (ownerEmail == null || ownerEmail.trim().isEmpty()) {
+            throw new ValidationException("Owner email is required.");
+        }
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            throw new ValidationException("Search term is required.");
+        }
+
+        String normalized = searchTerm.trim().toLowerCase();
+        List<Contact> contacts = contactRepository.getForUser(ownerEmail);
+        List<Contact> matches = new ArrayList<>();
+
+        for (Contact contact : contacts) {
+            if (contact == null) {
+                continue;
+            }
+
+            if (containsIgnoreCase(contact.getName(), normalized)) {
+                matches.add(contact);
+                continue;
+            }
+
+            boolean matched = false;
+            for (PhoneNumber phoneNumber : contact.getPhoneNumbers()) {
+                if (containsIgnoreCase(phoneNumber == null ? null : phoneNumber.toString(), normalized)) {
+                    matched = true;
+                    break;
+                }
+            }
+            if (matched) {
+                matches.add(contact);
+                continue;
+            }
+
+            for (EmailAddress emailAddress : contact.getEmailAddresses()) {
+                if (containsIgnoreCase(emailAddress == null ? null : emailAddress.toString(), normalized)) {
+                    matched = true;
+                    break;
+                }
+            }
+            if (matched) {
+                matches.add(contact);
+                continue;
+            }
+
+            for (String tag : contact.getTags()) {
+                if (containsIgnoreCase(tag, normalized)) {
+                    matched = true;
+                    break;
+                }
+            }
+            if (matched) {
+                matches.add(contact);
+            }
+        }
+
+        return matches;
+    }
+
+    private static boolean containsIgnoreCase(String value, String normalizedNeedle) {
+        if (value == null) {
+            return false;
+        }
+        return value.toLowerCase().contains(normalizedNeedle);
+    }
 }

@@ -1,12 +1,12 @@
 /**
- * Use Case 8 - Bulk Operations
+ * Use Case 9 - Search Contacts
  *
- * Extending UC7 to implement bulk operations on contacts (delete, tag, export).
+ * Extending UC8 to implement searching contacts by name, phone, email, or tags.
  *
  * Console entry point. Registers a user, logs them in using a chosen authentication
  * strategy, then allows profile updates and contact operations.
  * @author developer
- * @version 8.0
+ * @version 9.0
  * 
  */
 package com.mycontacts;
@@ -119,6 +119,7 @@ public class Main {
                             System.out.println("7) Edit contact (UC6)");
                             System.out.println("8) Delete contact (UC7)");
                             System.out.println("9) Bulk operations (UC8)");
+                            System.out.println("10) Search contacts (UC9)");
                             System.out.println("0) Exit");
                             System.out.print("Choose an option: ");
                             profileChoice = scanner.nextLine();
@@ -402,6 +403,21 @@ public class Main {
                                             System.out.println("Exported " + contacts.size() + " contact(s).");
                                         }
                                     } while (!"0".equals(bulkChoice));
+                                } else if ("10".equals(profileChoice)) {
+                                    System.out.println("\n=== UC9: Search Contacts ===");
+                                    System.out.print("Enter search term (name/phone/email/tag): ");
+                                    String term = scanner.nextLine();
+
+                                    List<Contact> results = contactService.searchContacts(loginEmail, term);
+                                    if (results.isEmpty()) {
+                                        System.out.println("No contacts matched your search.");
+                                    } else {
+                                        System.out.println("Found " + results.size() + " matching contact(s).\n");
+                                        for (Contact result : results) {
+                                            System.out.println(result);
+                                            System.out.println();
+                                        }
+                                    }
                                 }
                             } catch (ValidationException profileException) {
                                 System.out.println("\nProfile update failed: " + profileException.getMessage());
