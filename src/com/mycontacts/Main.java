@@ -1,16 +1,17 @@
 /**
- * Use Case 9 - Search Contacts
+ * Use Case 10 - Advanced Filtering
  *
- * Extending UC8 to implement searching contacts by name, phone, email, or tags.
+ * Extending UC9 to implement advanced filtering by tag, date added, and frequently contacted.
  *
  * Console entry point. Registers a user, logs them in using a chosen authentication
  * strategy, then allows profile updates and contact operations.
  * @author developer
- * @version 9.0
+ * @version 10.0
  * 
  */
 package com.mycontacts;
 
+import java.time.LocalDate;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,6 +121,7 @@ public class Main {
                             System.out.println("8) Delete contact (UC7)");
                             System.out.println("9) Bulk operations (UC8)");
                             System.out.println("10) Search contacts (UC9)");
+                            System.out.println("11) Advanced filtering (UC10)");
                             System.out.println("0) Exit");
                             System.out.print("Choose an option: ");
                             profileChoice = scanner.nextLine();
@@ -196,6 +198,7 @@ public class Main {
                                     } else {
                                         System.out.println();
                                         for (Contact match : matches) {
+                                            match.incrementTimesContacted();
                                             System.out.println(match);
                                             System.out.println();
                                         }
@@ -415,6 +418,47 @@ public class Main {
                                         System.out.println("Found " + results.size() + " matching contact(s).\n");
                                         for (Contact result : results) {
                                             System.out.println(result);
+                                            System.out.println();
+                                        }
+                                    }
+                                } else if ("11".equals(profileChoice)) {
+                                    System.out.println("\n=== UC10: Advanced Filtering ===");
+                                    System.out.println("(Press Enter to skip any filter)");
+
+                                    System.out.print("Filter by tag: ");
+                                    String tag = scanner.nextLine();
+
+                                    System.out.print("Filter by date added from (YYYY-MM-DD): ");
+                                    String dateInput = scanner.nextLine();
+                                    LocalDate addedFrom = null;
+                                    if (dateInput != null && !dateInput.trim().isEmpty()) {
+                                        try {
+                                            addedFrom = LocalDate.parse(dateInput.trim());
+                                        } catch (Exception exception) {
+                                            System.out.println("Invalid date format. Use YYYY-MM-DD.");
+                                            continue;
+                                        }
+                                    }
+
+                                    System.out.print("Filter by minimum times contacted (number): ");
+                                    String minInput = scanner.nextLine();
+                                    Integer minTimesContacted = null;
+                                    if (minInput != null && !minInput.trim().isEmpty()) {
+                                        try {
+                                            minTimesContacted = Integer.parseInt(minInput.trim());
+                                        } catch (NumberFormatException exception) {
+                                            System.out.println("Invalid number.");
+                                            continue;
+                                        }
+                                    }
+
+                                    List<Contact> filtered = contactService.filterContacts(loginEmail, tag, addedFrom, minTimesContacted);
+                                    if (filtered.isEmpty()) {
+                                        System.out.println("No contacts matched the applied filters.");
+                                    } else {
+                                        System.out.println("Found " + filtered.size() + " contact(s).\n");
+                                        for (Contact contact : filtered) {
+                                            System.out.println(contact);
                                             System.out.println();
                                         }
                                     }

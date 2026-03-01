@@ -8,6 +8,7 @@
  */
 package com.mycontacts.contact.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -167,6 +168,54 @@ public class ContactService {
         }
 
         return matches;
+    }
+
+    public List<Contact> filterContacts(String ownerEmail, String tag, LocalDate addedFromDate, Integer minTimesContacted)
+            throws ValidationException {
+
+        if (ownerEmail == null || ownerEmail.trim().isEmpty()) {
+            throw new ValidationException("Owner email is required.");
+        }
+
+        String normalizedTag = tag == null ? "" : tag.trim();
+        boolean filterByTag = !normalizedTag.isEmpty();
+
+        List<Contact> contacts = contactRepository.getForUser(ownerEmail);
+        List<Contact> filtered = new ArrayList<>();
+
+        for (Contact contact : contacts) {
+            if (contact == null) {
+                continue;
+            }
+
+            if (filterByTag && !hasTag(contact, normalizedTag)) {
+                continue;
+            }
+
+            if (addedFromDate != null) {
+                LocalDate createdDate = contact.getCreatedAt() == null ? null : contact.getCreatedAt().toLocalDate();
+                if (createdDate == null || createdDate.isBefore(addedFromDate)) {
+                    continue;
+                }
+            }
+
+            if (minTimesContacted != null && contact.getTimesContacted() < minTimesContacted) {
+                continue;
+            }
+
+            filtered.add(contact);
+        }
+
+        return filtered;
+    }
+
+    private static boolean hasTag(Contact contact, String tag) {
+        for (String existing : contact.getTags()) {
+            if (existing != null && existing.trim().equalsIgnoreCase(tag.trim())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean containsIgnoreCase(String value, String normalizedNeedle) {

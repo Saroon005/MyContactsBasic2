@@ -21,6 +21,7 @@ public abstract class Contact {
     private final List<PhoneNumber> phoneNumbers;
     private final List<EmailAddress> emailAddresses;
     private final List<String> tags;
+    private int timesContacted;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String notes;
@@ -32,6 +33,7 @@ public abstract class Contact {
         this.phoneNumbers = new ArrayList<>(phoneNumbers == null ? List.of() : phoneNumbers);
         this.emailAddresses = new ArrayList<>(emailAddresses == null ? List.of() : emailAddresses);
         this.tags = new ArrayList<>();
+        this.timesContacted = 0;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.notes = notes;
@@ -88,6 +90,15 @@ public abstract class Contact {
         touch();
     }
 
+    public int getTimesContacted() {
+        return timesContacted;
+    }
+
+    public void incrementTimesContacted() {
+        this.timesContacted++;
+        touch();
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -118,6 +129,8 @@ public abstract class Contact {
         builder.append("Contact ID: ").append(id).append("\n");
         builder.append("Contact Type: ").append(getContactType()).append("\n");
         builder.append("Contact Name: ").append(name).append("\n");
+
+        builder.append("Times Contacted: ").append(timesContacted).append("\n");
 
         builder.append("Tags: ");
         if (tags.isEmpty()) {
