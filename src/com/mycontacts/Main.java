@@ -1,13 +1,13 @@
 /**
- * Use Case 11 - Create and Manage Tags
+ * Use Case 12 - Apply Tags to Contacts
  *
- * Extending UC10 to implement creating and managing user tags for organizing contacts.
+ * Adds the ability for a logged-in user to assign one or multiple tags to a contact.
  *
  * Console entry point. Registers a user, logs them in using a chosen authentication
  * strategy, then allows profile updates and contact operations.
  * @author developer
- * @version 11.0
- * 
+ * @version 12.0
+ *
  */
 package com.mycontacts;
 
@@ -256,6 +256,7 @@ public class Main {
                                         System.out.println("2) Update notes");
                                         System.out.println("3) Add phone number");
                                         System.out.println("4) Add email address");
+                                        System.out.println("5) Add tag(s) (UC12)");
                                         System.out.println("0) Back");
                                         System.out.print("Choose an option: ");
                                         editChoice = scanner.nextLine();
@@ -291,6 +292,21 @@ public class Main {
                                             } else {
                                                 selectedContact.addEmailAddress(new EmailAddress(emailToAdd.trim()));
                                                 System.out.println("Email address added.");
+                                            }
+                                        } else if ("5".equals(editChoice)) {
+                                            System.out.print("Enter tag(s) separated by commas: ");
+                                            String tagsInput = scanner.nextLine();
+                                            List<String> tags = parseCommaSeparated(tagsInput);
+                                            if (tags.isEmpty()) {
+                                                System.out.println("No tags provided.");
+                                            } else {
+                                                int applied = 0;
+                                                for (String tag : tags) {
+                                                    tagService.createTag(loginEmail, tag);
+                                                    selectedContact.addTag(tag);
+                                                    applied++;
+                                                }
+                                                System.out.println("Applied " + applied + " tag(s) to contact.");
                                             }
                                         }
                                     } while (!"0".equals(editChoice));
