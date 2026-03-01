@@ -1,12 +1,12 @@
 /**
- * Use Case 5 - View Contact Details
+ * Use Case 6 - Edit Contact
  *
- * Extending UC4 to implement viewing contact details.
+ * Extending UC5 to implement editing contacts.
  *
  * Console entry point. Registers a user, logs them in using a chosen authentication
  * strategy, then allows profile updates and contact operations.
  * @author developer
- * @version 5.0
+ * @version 6.0
  */
 package com.mycontacts;
 
@@ -115,6 +115,7 @@ public class Main {
                             System.out.println("4) View profile");
                             System.out.println("5) Create contact (UC4)");
                             System.out.println("6) View contact details (UC5)");
+                            System.out.println("7) Edit contact (UC6)");
                             System.out.println("0) Exit");
                             System.out.print("Choose an option: ");
                             profileChoice = scanner.nextLine();
@@ -195,6 +196,93 @@ public class Main {
                                             System.out.println();
                                         }
                                     }
+                                } else if ("7".equals(profileChoice)) {
+                                    System.out.println("\n=== UC6: Edit Contact ===");
+                                    System.out.print("Enter Contact Name: ");
+                                    String contactName = scanner.nextLine();
+
+                                    List<Contact> matches = contactService.findContactsByName(loginEmail, contactName);
+                                    if (matches.isEmpty()) {
+                                        System.out.println("No contact found with that name.");
+                                        continue;
+                                    }
+
+                                    Contact selectedContact;
+                                    if (matches.size() == 1) {
+                                        selectedContact = matches.get(0);
+                                    } else {
+                                        System.out.println("Multiple contacts found with that name:");
+                                        for (int i = 0; i < matches.size(); i++) {
+                                            Contact match = matches.get(i);
+                                            System.out.println((i + 1) + ") " + match.getContactType() + " | " + match.getName() + " | Created: " + match.getCreatedAt());
+                                        }
+
+                                        System.out.print("Select contact number to edit: ");
+                                        String selectionInput = scanner.nextLine();
+                                        int selection;
+                                        try {
+                                            selection = Integer.parseInt(selectionInput == null ? "" : selectionInput.trim());
+                                        } catch (NumberFormatException exception) {
+                                            System.out.println("Invalid selection. Please enter a number.");
+                                            continue;
+                                        }
+
+                                        if (selection < 1 || selection > matches.size()) {
+                                            System.out.println("Invalid selection. Choose a number from 1 to " + matches.size() + ".");
+                                            continue;
+                                        }
+
+                                        selectedContact = matches.get(selection - 1);
+                                    }
+
+                                    String editChoice;
+                                    do {
+                                        System.out.println("\nCurrent Contact:");
+                                        System.out.println(selectedContact);
+
+                                        System.out.println("\nEdit Options:");
+                                        System.out.println("1) Update contact name");
+                                        System.out.println("2) Update notes");
+                                        System.out.println("3) Add phone number");
+                                        System.out.println("4) Add email address");
+                                        System.out.println("0) Back");
+                                        System.out.print("Choose an option: ");
+                                        editChoice = scanner.nextLine();
+
+                                        if ("1".equals(editChoice)) {
+                                            System.out.print("Enter new contact name: ");
+                                            String newName = scanner.nextLine();
+                                            if (newName == null || newName.trim().isEmpty()) {
+                                                System.out.println("Contact name cannot be empty.");
+                                            } else {
+                                                selectedContact.setName(newName.trim());
+                                                System.out.println("Contact name updated.");
+                                            }
+                                        } else if ("2".equals(editChoice)) {
+                                            System.out.print("Enter new notes (press Enter to clear): ");
+                                            String newNotes = scanner.nextLine();
+                                            selectedContact.setNotes(newNotes);
+                                            System.out.println("Notes updated.");
+                                        } else if ("3".equals(editChoice)) {
+                                            System.out.print("Enter phone number to add: ");
+                                            String phone = scanner.nextLine();
+                                            if (phone == null || phone.trim().isEmpty()) {
+                                                System.out.println("Phone number cannot be empty.");
+                                            } else {
+                                                selectedContact.addPhoneNumber(new PhoneNumber(phone.trim()));
+                                                System.out.println("Phone number added.");
+                                            }
+                                        } else if ("4".equals(editChoice)) {
+                                            System.out.print("Enter email address to add: ");
+                                            String emailToAdd = scanner.nextLine();
+                                            if (emailToAdd == null || emailToAdd.trim().isEmpty()) {
+                                                System.out.println("Email address cannot be empty.");
+                                            } else {
+                                                selectedContact.addEmailAddress(new EmailAddress(emailToAdd.trim()));
+                                                System.out.println("Email address added.");
+                                            }
+                                        }
+                                    } while (!"0".equals(editChoice));
                                 }
                             } catch (ValidationException profileException) {
                                 System.out.println("\nProfile update failed: " + profileException.getMessage());
