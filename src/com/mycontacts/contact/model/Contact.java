@@ -20,6 +20,7 @@ public abstract class Contact {
     private String name;
     private final List<PhoneNumber> phoneNumbers;
     private final List<EmailAddress> emailAddresses;
+    private final List<String> tags;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String notes;
@@ -30,6 +31,7 @@ public abstract class Contact {
         this.name = name;
         this.phoneNumbers = new ArrayList<>(phoneNumbers == null ? List.of() : phoneNumbers);
         this.emailAddresses = new ArrayList<>(emailAddresses == null ? List.of() : emailAddresses);
+        this.tags = new ArrayList<>();
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.notes = notes;
@@ -68,6 +70,24 @@ public abstract class Contact {
         touch();
     }
 
+    public List<String> getTags() {
+        return Collections.unmodifiableList(tags);
+    }
+
+    public void addTag(String tag) {
+        if (tag == null || tag.trim().isEmpty()) {
+            return;
+        }
+        String normalized = tag.trim();
+        for (String existing : tags) {
+            if (existing != null && existing.equalsIgnoreCase(normalized)) {
+                return;
+            }
+        }
+        tags.add(normalized);
+        touch();
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -98,6 +118,13 @@ public abstract class Contact {
         builder.append("Contact ID: ").append(id).append("\n");
         builder.append("Contact Type: ").append(getContactType()).append("\n");
         builder.append("Contact Name: ").append(name).append("\n");
+
+        builder.append("Tags: ");
+        if (tags.isEmpty()) {
+            builder.append("None\n");
+        } else {
+            builder.append(String.join(", ", tags)).append("\n");
+        }
 
         builder.append("Phone Numbers: ");
         if (phoneNumbers.isEmpty()) {

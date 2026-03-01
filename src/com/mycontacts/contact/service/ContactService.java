@@ -101,4 +101,12 @@ public class ContactService {
 
         return contactRepository.deleteByNameForUser(ownerEmail, contactName);
     }
+
+    public List<Contact> getContactsForUser(String ownerEmail) throws ValidationException {
+        if (ownerEmail == null || ownerEmail.trim().isEmpty()) {
+            throw new ValidationException("Owner email is required.");
+        }
+
+        return contactRepository.getForUser(ownerEmail);
+    }
 }

@@ -1,12 +1,12 @@
 /**
- * Use Case 7 - Delete Contact
+ * Use Case 8 - Bulk Operations
  *
- * Extending UC6 to implement deleting contacts.
+ * Extending UC7 to implement bulk operations on contacts (delete, tag, export).
  *
  * Console entry point. Registers a user, logs them in using a chosen authentication
  * strategy, then allows profile updates and contact operations.
  * @author developer
- * @version 7.0
+ * @version 8.0
  * 
  */
 package com.mycontacts;
@@ -118,6 +118,7 @@ public class Main {
                             System.out.println("6) View contact details (UC5)");
                             System.out.println("7) Edit contact (UC6)");
                             System.out.println("8) Delete contact (UC7)");
+                            System.out.println("9) Bulk operations (UC8)");
                             System.out.println("0) Exit");
                             System.out.print("Choose an option: ");
                             profileChoice = scanner.nextLine();
@@ -307,6 +308,100 @@ public class Main {
 
                                     int deletedCount = contactService.deleteContactsByName(loginEmail, contactName);
                                     System.out.println("Deleted " + deletedCount + " contact(s).");
+                                } else if ("9".equals(profileChoice)) {
+                                    String bulkChoice;
+                                    do {
+                                        System.out.println("\n=== UC8: Bulk Operations ===");
+                                        System.out.println("1) Bulk delete (by contact names)");
+                                        System.out.println("2) Bulk tag (by contact names)");
+                                        System.out.println("3) Export contacts (print to console)");
+                                        System.out.println("0) Back");
+                                        System.out.print("Choose an option: ");
+                                        bulkChoice = scanner.nextLine();
+
+                                        if ("1".equals(bulkChoice)) {
+                                            System.out.print("Enter contact names separated by commas: ");
+                                            String namesInput = scanner.nextLine();
+                                            List<String> names = parseCommaSeparated(namesInput);
+                                            if (names.isEmpty()) {
+                                                System.out.println("No contact names provided.");
+                                                continue;
+                                            }
+
+                                            int totalMatches = 0;
+                                            for (String name : names) {
+                                                totalMatches += contactService.findContactsByName(loginEmail, name).size();
+                                            }
+
+                                            if (totalMatches == 0) {
+                                                System.out.println("No matching contacts found.");
+                                                continue;
+                                            }
+
+                                            System.out.println("Found " + totalMatches + " contact(s) across the provided names.");
+                                            System.out.print("Are you sure you want to delete? (yes/no): ");
+                                            String confirm = scanner.nextLine();
+                                            boolean confirmed = confirm != null && confirm.trim().equalsIgnoreCase("yes");
+                                            if (!confirmed) {
+                                                System.out.println("Bulk delete cancelled.");
+                                                continue;
+                                            }
+
+                                            int deleted = 0;
+                                            for (String name : names) {
+                                                deleted += contactService.deleteContactsByName(loginEmail, name);
+                                            }
+                                            System.out.println("Deleted " + deleted + " contact(s).");
+                                        } else if ("2".equals(bulkChoice)) {
+                                            System.out.print("Enter tag to apply: ");
+                                            String tag = scanner.nextLine();
+                                            if (tag == null || tag.trim().isEmpty()) {
+                                                System.out.println("Tag cannot be empty.");
+                                                continue;
+                                            }
+
+                                            System.out.print("Enter contact names separated by commas: ");
+                                            String namesInput = scanner.nextLine();
+                                            List<String> names = parseCommaSeparated(namesInput);
+                                            if (names.isEmpty()) {
+                                                System.out.println("No contact names provided.");
+                                                continue;
+                                            }
+
+                                            int taggedContacts = 0;
+                                            for (String name : names) {
+                                                List<Contact> matches = contactService.findContactsByName(loginEmail, name);
+                                                for (Contact match : matches) {
+                                                    match.addTag(tag);
+                                                    taggedContacts++;
+                                                }
+                                            }
+
+                                            if (taggedContacts == 0) {
+                                                System.out.println("No matching contacts found.");
+                                            } else {
+                                                System.out.println("Tagged " + taggedContacts + " contact(s) with: " + tag.trim());
+                                            }
+                                        } else if ("3".equals(bulkChoice)) {
+                                            List<Contact> contacts = contactService.getContactsForUser(loginEmail);
+                                            if (contacts.isEmpty()) {
+                                                System.out.println("No contacts to export.");
+                                                continue;
+                                            }
+
+                                            System.out.println("\n=== Export (Console) ===");
+                                            System.out.println("Type | Name | Phones | Emails | Tags | Notes");
+                                            for (Contact contact : contacts) {
+                                                String phones = joinList(contact.getPhoneNumbers());
+                                                String emails = joinList(contact.getEmailAddresses());
+                                                String tags = joinList(contact.getTags());
+                                                String notes = contact.getNotes() == null ? "" : contact.getNotes().trim();
+                                                System.out.println(contact.getContactType() + " | " + contact.getName() + " | " + phones + " | " + emails + " | " + tags + " | " + notes);
+                                            }
+
+                                            System.out.println("Exported " + contacts.size() + " contact(s).");
+                                        }
+                                    } while (!"0".equals(bulkChoice));
                                 }
                             } catch (ValidationException profileException) {
                                 System.out.println("\nProfile update failed: " + profileException.getMessage());
@@ -318,5 +413,40 @@ public class Main {
                 }
             } while (!"0".equals(choice));
         }
+    }
+
+    private static List<String> parseCommaSeparated(String input) {
+        List<String> result = new ArrayList<>();
+        if (input == null) {
+            return result;
+        }
+        String[] parts = input.split(",");
+        for (String part : parts) {
+            if (part == null) {
+                continue;
+            }
+            String value = part.trim();
+            if (!value.isEmpty()) {
+                result.add(value);
+            }
+        }
+        return result;
+    }
+
+    private static String joinList(List<?> values) {
+        if (values == null || values.isEmpty()) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (Object value : values) {
+            if (value == null) {
+                continue;
+            }
+            if (builder.length() > 0) {
+                builder.append(";");
+            }
+            builder.append(value);
+        }
+        return builder.toString();
     }
 }
