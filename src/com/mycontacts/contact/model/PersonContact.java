@@ -2,8 +2,6 @@
  * Use Case 4 - Create Contact
  *
  * Person contact type.
- * @author developer
- * @version 1.0
  */
 package com.mycontacts.contact.model;
 

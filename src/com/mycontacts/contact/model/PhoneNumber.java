@@ -2,8 +2,6 @@
  * Use Case 4 - Create Contact
  *
  * Value object representing a phone number for a contact.
- * @author developer
- * @version 1.0
  */
 package com.mycontacts.contact.model;
 

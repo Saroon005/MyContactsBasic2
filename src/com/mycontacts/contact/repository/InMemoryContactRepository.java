@@ -1,10 +1,8 @@
 /**
- * Use Case 4 - Create Contact
+ * Use Case 4/5 - Create Contact, View Contact Details
  *
  * In-memory repository for contacts using a HashMap-like structure.
  * Stores: userEmail -> List of contacts.
- * @author developer
- * @version 1.0
  */
 package com.mycontacts.contact.repository;
 
@@ -12,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.mycontacts.contact.model.Contact;
@@ -39,5 +39,24 @@ public class InMemoryContactRepository implements ContactRepository {
             return List.of();
         }
         return Collections.unmodifiableList(list);
+    }
+
+    @Override
+    public Optional<Contact> findByIdForUser(String userEmail, UUID contactId) {
+        if (userEmail == null || contactId == null) {
+            return Optional.empty();
+        }
+
+        List<Contact> list = contactsByUserEmail.get(userEmail.toLowerCase());
+        if (list == null) {
+            return Optional.empty();
+        }
+
+        for (Contact contact : list) {
+            if (contactId.equals(contact.getId())) {
+                return Optional.of(contact);
+            }
+        }
+        return Optional.empty();
     }
 }

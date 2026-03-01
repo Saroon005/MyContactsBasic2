@@ -1,10 +1,11 @@
 /**
- * Use Case 4 - Create Contact
+ * Use Case 4/5 - Create Contact, View Contact Details
  *
  * Base contact model with common fields such as id, name, phone numbers, emails,
  * and created/updated timestamps.
- * @author developer
- * @version 1.0
+ *
+ * UC5 requires a readable contact details view, so this class provides a
+ * formatted toString() for console display.
  */
 package com.mycontacts.contact.model;
 
@@ -89,4 +90,44 @@ public abstract class Contact {
     }
 
     public abstract String getContactType();
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("=== Contact Details ===\n");
+        builder.append("Contact ID: ").append(id).append("\n");
+        builder.append("Contact Type: ").append(getContactType()).append("\n");
+        builder.append("Contact Name: ").append(name).append("\n");
+
+        builder.append("Phone Numbers: ");
+        if (phoneNumbers.isEmpty()) {
+            builder.append("None\n");
+        } else {
+            builder.append("\n");
+            for (PhoneNumber phoneNumber : phoneNumbers) {
+                builder.append("- ").append(phoneNumber).append("\n");
+            }
+        }
+
+        builder.append("Email Addresses: ");
+        if (emailAddresses.isEmpty()) {
+            builder.append("None\n");
+        } else {
+            builder.append("\n");
+            for (EmailAddress emailAddress : emailAddresses) {
+                builder.append("- ").append(emailAddress).append("\n");
+            }
+        }
+
+        builder.append("Notes: ");
+        if (notes == null || notes.trim().isEmpty()) {
+            builder.append("None\n");
+        } else {
+            builder.append(notes.trim()).append("\n");
+        }
+
+        builder.append("Created At: ").append(createdAt).append("\n");
+        builder.append("Last Updated: ").append(updatedAt);
+        return builder.toString();
+    }
 }

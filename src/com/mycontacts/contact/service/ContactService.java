@@ -1,15 +1,17 @@
 /**
- * Use Case 4 - Create Contact
+ * Use Case 4/5 - Create Contact, View Contact Details
  *
- * Service for creating contacts for a logged-in user.
+ * Service for creating and retrieving contacts for a logged-in user.
  * Uses composition (PhoneNumber, EmailAddress) and stores contacts via repository.
  * @author developer
- * @version 1.0
+ * @version 1.1
  */
 package com.mycontacts.contact.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.mycontacts.contact.model.Contact;
@@ -52,5 +54,40 @@ public class ContactService {
 
         contactRepository.addForUser(ownerEmail, contact);
         return contact;
+    }
+
+    public Optional<Contact> findContactById(String ownerEmail, UUID contactId) throws ValidationException {
+        if (ownerEmail == null || ownerEmail.trim().isEmpty()) {
+            throw new ValidationException("Owner email is required.");
+        }
+        if (contactId == null) {
+            throw new ValidationException("Contact ID is required.");
+        }
+
+        return contactRepository.findByIdForUser(ownerEmail, contactId);
+    }
+
+    public List<Contact> findContactsByName(String ownerEmail, String contactName) throws ValidationException {
+        if (ownerEmail == null || ownerEmail.trim().isEmpty()) {
+            throw new ValidationException("Owner email is required.");
+        }
+        if (contactName == null || contactName.trim().isEmpty()) {
+            throw new ValidationException("Contact name is required.");
+        }
+
+        String normalizedName = contactName.trim().toLowerCase();
+        List<Contact> contacts = contactRepository.getForUser(ownerEmail);
+        List<Contact> matches = new ArrayList<>();
+
+        for (Contact contact : contacts) {
+            if (contact == null || contact.getName() == null) {
+                continue;
+            }
+            if (contact.getName().trim().toLowerCase().equals(normalizedName)) {
+                matches.add(contact);
+            }
+        }
+
+        return matches;
     }
 }

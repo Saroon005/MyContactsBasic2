@@ -1,12 +1,12 @@
 /**
- * Use Case 1/2/3 - Registration, Login, Profile Management
+ * Use Case 5 - View Contact Details
  *
- * Extending UC1 to implement user login (UC2) and basic profile management (UC3).
+ * Extending UC4 to implement viewing contact details.
  *
  * Console entry point. Registers a user, logs them in using a chosen authentication
- * strategy, then allows simple profile updates.
+ * strategy, then allows profile updates and contact operations.
  * @author developer
- * @version 3.0
+ * @version 5.0
  */
 package com.mycontacts;
 
@@ -114,6 +114,7 @@ public class Main {
                             System.out.println("3) Update notifications preference");
                             System.out.println("4) View profile");
                             System.out.println("5) Create contact (UC4)");
+                            System.out.println("6) View contact details (UC5)");
                             System.out.println("0) Exit");
                             System.out.print("Choose an option: ");
                             profileChoice = scanner.nextLine();
@@ -179,6 +180,21 @@ public class Main {
                                     System.out.println("Contact ID: " + created.getId());
                                     System.out.println("Contact Type: " + created.getContactType());
                                     System.out.println("Contact Name: " + created.getName());
+                                } else if ("6".equals(profileChoice)) {
+                                    System.out.println("\n=== UC5: View Contact Details ===");
+                                    System.out.print("Enter Contact Name: ");
+                                    String contactName = scanner.nextLine();
+
+                                    List<Contact> matches = contactService.findContactsByName(loginEmail, contactName);
+                                    if (matches.isEmpty()) {
+                                        System.out.println("No contact found with that name.");
+                                    } else {
+                                        System.out.println();
+                                        for (Contact match : matches) {
+                                            System.out.println(match);
+                                            System.out.println();
+                                        }
+                                    }
                                 }
                             } catch (ValidationException profileException) {
                                 System.out.println("\nProfile update failed: " + profileException.getMessage());
