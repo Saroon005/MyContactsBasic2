@@ -7,6 +7,7 @@
  * strategy, then allows profile updates and contact operations.
  * @author developer
  * @version 6.0
+ * 
  */
 package com.mycontacts;
 
